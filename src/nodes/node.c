@@ -6,34 +6,17 @@
 static Node nodes[MAX_NODES];
 static int node_count = 0;
 
-char *generate_mac()
-{
-    char *mac = (char *)malloc(18);
-    if (mac == NULL)
-    {
-        perror("Erreur d'allocation mémoire");
-        return NULL;
-    }
-
+void generate_mac(char *mac) {
     sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-        (rand() % 256) & ~1, rand() % 256, rand() % 256,
-        rand() % 256, rand() % 256, rand() % 256);
-
-    return mac;
+            (rand() % 256) & ~1, rand() % 256, rand() % 256,
+            rand() % 256, rand() % 256, rand() % 256);
 }
 
-char *generate_ip(int node_id) 
-{
+void generate_ip(char *ip, int node_id) {
     int subnet = 1;
-    char *ip = (char *)malloc(16);
-    if (ip == NULL) {
-        perror("Erreur d'allocation mémoire");
-        return NULL;
-    }
-
     snprintf(ip, 16, "192.168.%d.%d", subnet, node_id);
-    return ip;
 }
+
 
 
 void add_node(const char *name)
@@ -59,8 +42,8 @@ void add_node(const char *name)
         Node node;
         node.id = node_count;
         snprintf(node.name, 50, "%s", name);
-        snprintf(node.ip, 16, "%s", generate_ip(node.id));
-        snprintf(node.mac, 18, "%s", generate_mac());
+        generate_ip(node.ip, node.id);
+        generate_mac(node.mac);
 
         nodes[node_count] = node;
         node_count++;
