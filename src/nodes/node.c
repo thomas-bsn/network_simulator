@@ -1,60 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "interfaces.h"
 #include "../../include/node.h"
 #include "../../include/config_parser.h"
 
 Node nodes[MAX_NODES];
 int node_count = 0;
 
-void generate_mac(char *mac) 
+
+
+void add_interface_to_node(Node *node, const char *network_name, const char *ip, const char *gateway) 
 {
-    sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-            (rand() % 256) & ~1, rand() % 256, rand() % 256,
-            rand() % 256, rand() % 256, rand() % 256);
+    if (node->interface_count >= MAX_INTERFACES) {
+        printf("Erreur : Le noeud %s a atteint le nombre maximum d'interfaces.\n", node->name);
+        return;
+    }
+
+    Interface *iface = &node->interfaces[node->interface_count];
+    strncpy(iface->name, network_name, MAX_NETWORK_NAME);
+    strncpy(iface->ip, ip, 16);
+    strncpy(iface->gateway, gateway, 16);
+    generate_mac(iface->mac);
+
+    printf("Interface ajoutée à %s -> Réseau : %s, IP : %s, MAC : %s, Passerelle : %s\n",
+           node->name, iface->name, iface->ip, iface->mac, iface->gateway);
+
+    node->interface_count++;
 }
-
-void generate_ip(char *ip, int node_id) 
-{
-    int subnet = 1;
-    snprintf(ip, 16, "192.168.%d.%d", subnet, node_id);
-}
-
-
 
 void add_node(const char *name) 
 {
-    if (name == NULL) 
-    {
+    if (name == NULL) {
         printf("Nom du noeud manquant\n");
         return;
     }
 
-    char clean_name[50];
-    snprintf(clean_name, sizeof(clean_name), "%s", name);
-
-    for (int i = 0; i < node_count; i++) {
-        if (strcmp(nodes[i].name, clean_name) == 0) {
-            printf("Le noeud %s existe déjà\n", clean_name);
-            return;
-        }
-    }
-
-    if (node_count < MAX_NODES) {
-        Node node;
-        node.id = node_count;
-        snprintf(node.name, sizeof(node.name), "%s", clean_name);
-        generate_ip(node.ip, node.id);
-        generate_mac(node.mac);
-
-        nodes[node_count] = node;
-        node_count++;
-        printf("Noeud ajouté : %s (IP : %s, MAC: %s)\n", node.name, node.ip, node.mac);
+    if (node_count >= MAX_NODES) {
+        printf("Nombre maximum de noeuds atteint\n");
         return;
     }
-    printf("Nombre maximum de noeuds atteint\n");
-}
 
+    Node *node = &nodes[node_count];
+    node->id = node_count;
+    strncpy(node->name, name, 50);
+    node->interface_count = 0;
+
+    char ip[16];
+    generate_ip(ip, 1, node->id);
+    add_interface_to_node(node, "LAN", ip, "192.168.1.1");
+
+    node_count++;
+    printf("Noeud ajouté : %s avec une interface réseau %s (IP : %s)\n",
+           node->name, node->interfaces[0].name, node->interfaces[0].ip);
+}
 
 void list_nodes() 
 {
@@ -64,11 +63,20 @@ void list_nodes()
         return;
     }
 
-    printf("Liste des nœuds :\n");
+    printf("\nLISTE DES NŒUDS :\n");
     for (int i = 0; i < node_count; i++) 
-        printf("  - %s (IP : %s, MAC : %s)\n",
-               nodes[i].name, nodes[i].ip, nodes[i].mac);
+    {
+        if (nodes[i].interface_count > 0) {
+            Interface *iface = &nodes[i].interfaces[0]; // Prend la première interface
+            printf("  - %s (IP : %s, MAC : %s)\n",
+                   nodes[i].name, iface->ip, iface->mac);
+        } else {
+            printf("  - %s (Aucune interface configurée)\n", nodes[i].name);
+        }
+    }
+    printf("\n");
 }
+
 
 int verify_node(const char *name)
 {
@@ -82,18 +90,37 @@ int verify_node(const char *name)
     return 999;
 }
 
-void show_node(const char *name)
+void show_node(const char *name) 
 {
     int i = verify_node(name);
-    if (i != 999)
-    {
-        printf("Noeud %s (IP : %s, MAC : %s)\n", nodes[i].name, nodes[i].ip, nodes[i].mac);
-    }
-    else
-    {
+    if (i == 999) {
         printf("Noeud introuvable : %s\n", name);
+        return;
     }
+
+    Node *node = &nodes[i];
+
+    printf("\n==== INFOS DU NOEUD ====\n");
+    printf("Nom       : %s\n", node->name);
+    printf("ID        : %d\n", node->id);
+    printf("Interfaces : %d\n", node->interface_count);
+
+    if (node->interface_count == 0) {
+        printf("   ⚠ Aucun réseau configuré.\n");
+    } else {
+        for (int j = 0; j < node->interface_count; j++) {
+            Interface *iface = &node->interfaces[j];
+            printf("    Interface %d\n", j + 1);
+            printf("      - Réseau : %s\n", iface->name);
+            printf("      - IP      : %s\n", iface->ip);
+            printf("      - MAC     : %s\n", iface->mac);
+            printf("      - Gateway : %s\n", iface->gateway);
+        }
+    }
+
+    printf("=========================\n\n");
 }
+
 
 void remove_node(const char *name)
 {

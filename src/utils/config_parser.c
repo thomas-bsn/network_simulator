@@ -48,18 +48,18 @@ void parse_config(const char *filename) {
             add_node(value);
         } 
         else if (mode == 2 && strchr(line, '=')) {
-            strtok(line, "="); // Ignore la clé
+            strtok(line, "=");
             char *value = strtok(NULL, "=");
             trim(value);
 
-            // Extraction des valeurs
             char node1[50], node2[50], latency[10] = "", bandwidth[10] = "";
             int parsed = sscanf(value, "%49[^,],%49[^,],%9[^,],%9s", node1, node2, latency, bandwidth);
 
             if (parsed >= 2) {
                 char *latency_arg = (parsed >= 3 && latency[0] != '\0') ? latency : NULL;
                 char *bandwidth_arg = (parsed == 4 && bandwidth[0] != '\0') ? bandwidth : NULL;
-                add_link(node1, node2, latency_arg, bandwidth_arg);
+            
+                add_link(node1, "LAN", node2, "LAN", latency_arg, bandwidth_arg);
             } else {
                 printf("Format de lien incorrect dans config.ini: %s\n", line);
             }
@@ -73,11 +73,35 @@ void parse_config(const char *filename) {
 
 void print_config() 
 {
-    printf("Nodes:\n");
-    for (int i = 0; i < node_count; i++)
-        printf("- %s\n", nodes[i].name);
 
-    printf("\nLinks:\n");
-    for (int i = 0; i < link_count; i++)
-        printf("- %s <-> %s\n", links[i].node1, links[i].node2);
+
+    printf("\n==== CONFIGURATION DU RÉSEAU ====\n\n");
+
+    printf("NODES :\n");
+    for (int i = 0; i < node_count; i++) {
+        printf("🔹 Noeud : %s\n", nodes[i].name);
+        printf("   Interfaces :\n");
+
+        for (int j = 0; j < nodes[i].interface_count; j++) {
+            Interface *iface = &nodes[i].interfaces[j];
+            printf("     - Réseau : %s\n", iface->name);
+            printf("       IP      : %s\n", iface->ip);
+            printf("       MAC     : %s\n", iface->mac);
+            printf("       Gateway : %s\n", iface->gateway);
+        }
+        printf("\n");
+    }
+
+    printf("LINKS :\n");
+    if (link_count == 0) {
+        printf("   Aucun lien configuré.\n");
+    } else {
+        for (int i = 0; i < link_count; i++) {
+            printf("   %s <--> %s\n", links[i].node1, links[i].node2);
+            printf("      Latence : %d ms\n", links[i].latency);
+            printf("      Bande passante : %d Mbps\n", links[i].bandwidth);
+        }
+    }
+
+    printf("\n=================================\n");
 }
