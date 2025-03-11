@@ -63,7 +63,7 @@ void list_nodes()
         return;
     }
 
-    printf("\nLISTE DES NŒUDS :\n");
+    printf("\nLISTE DES NOEUDS :\n");
     for (int i = 0; i < node_count; i++) 
     {
         if (nodes[i].interface_count > 0) {
