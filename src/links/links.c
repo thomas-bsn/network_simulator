@@ -4,8 +4,8 @@
 #include "../../include/links.h"
 #include "../../include/node.h"
 
-static Link links[MAX_LINKS];
-static int link_count = 0;
+Link links[MAX_LINKS];
+int link_count = 0;
 
 int verify_link(const char *name1, const char *name2)
 {

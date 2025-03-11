@@ -5,6 +5,7 @@
 #include "../../include/logger.h"
 #include "../../include/node.h"
 #include "../../include/links.h"
+#include "../../include/config_parser.h"
 
 void logger(char *command) 
 {
@@ -33,6 +34,7 @@ void logger(char *command)
         printf("- remove_node [NOM] : Supprime un noeud\n");
         printf("- add_link [NOM1] [NOM2] [LATENCE] [BANDE_PASSANTE] : Ajoute un lien entre deux noeuds\n");
         printf("- list_links : Liste les liens\n");
+        printf("- config : Affiche la configuration\n");
         printf("- clear : Efface l'écran\n");
         printf("- quit : Quitte le programme\n");
     } 
@@ -59,10 +61,13 @@ void logger(char *command)
     }
     else if (strcmp(token, "show_node") == 0) 
     {
-        // char *node_name = strtok(NULL, " ");
-        // show_node(node_name);
-        // TODO: Implementer la fonction show_node
-    } 
+        char *node_name = strtok(NULL, " ");
+        if (node_name == NULL) {
+            printf("Erreur : Aucun nom de noeud fourni.\n");
+        } else {
+            show_node(node_name);
+        }
+    }
     else if (strcmp(token, "remove_node") == 0) 
     {
         char *node_name = strtok(NULL, " ");
@@ -72,7 +77,11 @@ void logger(char *command)
     {
         printf("\033[H\033[J");
     } 
-    else if (strcmp(command, "quit") == 0) 
+    else if (strcmp(command, "config") == 0) 
+    {
+        print_config();
+    }
+    else if ((strcmp(command, "quit") == 0) || (strcmp(command, "exit") == 0) || (strcmp(command, "q") == 0))
     {
         free(cmd_copy);
         exit(0);

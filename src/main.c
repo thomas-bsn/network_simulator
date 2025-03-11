@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "../include/logger.h"
+#include "../include/config_parser.h"
 
 int main()
 {
@@ -9,6 +11,10 @@ int main()
         perror("Erreur d'allocation mémoire");
         return 1;
     }
+
+    const char * config = "src/utils/config.ini";
+    if (access(config, F_OK) == 0)
+        parse_config(config);
 
     printf("Bienvenue dans le CLI Network Simulator\n");
     printf("Tapez 'help' pour tester ou 'quit' pour quitter.\n");

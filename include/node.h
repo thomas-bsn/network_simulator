@@ -10,6 +10,9 @@ typedef struct {
     char mac[18];
 } Node;
 
+extern int node_count;
+extern Node nodes[MAX_NODES];
+
 void add_node(const char *name);
 void list_nodes();
 void show_node(const char *name);

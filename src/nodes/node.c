@@ -2,56 +2,59 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../include/node.h"
+#include "../../include/config_parser.h"
 
-static Node nodes[MAX_NODES];
-static int node_count = 0;
+Node nodes[MAX_NODES];
+int node_count = 0;
 
-void generate_mac(char *mac) {
+void generate_mac(char *mac) 
+{
     sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
             (rand() % 256) & ~1, rand() % 256, rand() % 256,
             rand() % 256, rand() % 256, rand() % 256);
 }
 
-void generate_ip(char *ip, int node_id) {
+void generate_ip(char *ip, int node_id) 
+{
     int subnet = 1;
     snprintf(ip, 16, "192.168.%d.%d", subnet, node_id);
 }
 
 
 
-void add_node(const char *name)
+void add_node(const char *name) 
 {
-    if (name == NULL)
+    if (name == NULL) 
     {
         printf("Nom du noeud manquant\n");
         return;
     }
-    else
-    {
-        for(int i = 0; i < node_count; i++)
-        {
-            if (strcmp(nodes[i].name, name) == 0)
-            {
-                printf("Le noeud %s existe déjà\n", name);
-                return;
-            }
+
+    char clean_name[50];
+    snprintf(clean_name, sizeof(clean_name), "%s", name);
+
+    for (int i = 0; i < node_count; i++) {
+        if (strcmp(nodes[i].name, clean_name) == 0) {
+            printf("Le noeud %s existe déjà\n", clean_name);
+            return;
         }
     }
-    if (node_count < MAX_NODES)
-    {
+
+    if (node_count < MAX_NODES) {
         Node node;
         node.id = node_count;
-        snprintf(node.name, 50, "%s", name);
+        snprintf(node.name, sizeof(node.name), "%s", clean_name);
         generate_ip(node.ip, node.id);
         generate_mac(node.mac);
 
         nodes[node_count] = node;
         node_count++;
-        printf("Noeud ajouté : %s (IP : %s, Nom: %s, MAC: %s)\n", name, node.ip, node.name, node.mac);
+        printf("Noeud ajouté : %s (IP : %s, MAC: %s)\n", node.name, node.ip, node.mac);
         return;
     }
     printf("Nombre maximum de noeuds atteint\n");
 }
+
 
 void list_nodes() 
 {
