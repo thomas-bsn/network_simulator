@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "../include/logger.h"
+#include "core/event_loop.h"
 #include "../include/config_parser.h"
 
 int main()
@@ -18,6 +19,13 @@ int main()
 
     printf("Bienvenue dans le CLI Network Simulator\n");
     printf("Tapez 'help' pour tester ou 'quit' pour quitter.\n");
+
+    
+    #ifdef TEST_MODE
+        printf("[TEST MODE] Démarrage en mode test...\n");
+        runEventLoop();
+    #endif
+
     while (1) 
     {
         printf("> "); 

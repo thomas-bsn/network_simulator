@@ -4,6 +4,7 @@
 #include "interfaces.h"
 #include "../../include/node.h"
 #include "../../include/config_parser.h"
+#include "../protocols/arp.h"
 
 Node nodes[MAX_NODES];
 int node_count = 0;
@@ -40,12 +41,12 @@ void add_node(const char *name)
         printf("Nombre maximum de noeuds atteint\n");
         return;
     }
-
+    // Creation du noeud
     Node *node = &nodes[node_count];
     node->id = node_count;
     strncpy(node->name, name, 50);
     node->interface_count = 0;
-
+    // Creation de l'interface
     char ip[16];
     generate_ip(ip, 1, node->id);
     add_interface_to_node(node, "LAN", ip, "192.168.1.1");
