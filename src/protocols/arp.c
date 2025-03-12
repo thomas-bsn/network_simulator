@@ -63,7 +63,7 @@ void processARP(ARP_Packet *packet, Node *node)
             printf("[ARP] Je suis la cible ! Envoi de la réponse ARP...\n");
 
             ARP_Packet reply;
-            reply.header.type = TYPE_ARP;  // ✅ Définir le type ARP
+            reply.header.type = TYPE_ARP; 
             reply.htype = packet->htype;
             reply.ptype = packet->ptype;
             reply.hlen = packet->hlen;
